@@ -9,8 +9,13 @@ contract MiniTreasury is ERC721TokenReceiver {
 
     mapping(address token => bool) public enabledTokens;
 
-    mapping(address sender => mapping(address token => uint256)) public erc20Deposits;
-    mapping(address sender => mapping(address token => uint256)) public erc721Deposits;
+    mapping(address sender => 
+        mapping(address token => uint256)) public erc20Deposits;
+
+    mapping(address sender => 
+        mapping(address token => 
+            mapping(uint256 tokenId => bool))) public erc721Deposits;
+
 
     event DepositERC20(address indexed sender, address indexed token, uint256 amount);
     event DepositERC721(address indexed sender, address indexed token, uint256 tokenId);
@@ -60,16 +65,16 @@ contract MiniTreasury is ERC721TokenReceiver {
     function depositERC721(address token, uint256 tokenId) external {
         ERC721(token).transferFrom(msg.sender, address(this), tokenId);
 
-        erc721Deposits[msg.sender][token] = tokenId;
+        erc721Deposits[msg.sender][token][tokenId] = true;
         
         emit DepositERC721(msg.sender, token, tokenId);
     }
 
     function withdrawERC721(address token, uint256 tokenId) external {
         require(enabledTokens[token], "Token not enabled");
-        require(erc721Deposits[msg.sender][token] == tokenId, "Incorrect token ID");
+        require(erc721Deposits[msg.sender][token][tokenId] == true, "Incorrect token ID");
 
-        delete erc721Deposits[msg.sender][token];
+        delete erc721Deposits[msg.sender][token][tokenId];
 
         ERC721(token).safeTransferFrom(address(this), msg.sender, tokenId);
 

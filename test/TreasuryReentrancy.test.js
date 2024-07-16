@@ -18,7 +18,7 @@ describe("TreasuryReentrancy", function() {
         const tokenERC20 = await ERC20.deploy("Test Token", "TT", decimals);
         await tokenERC20.waitForDeployment();
 
-        // Deploy TestContractReceiver
+        // Deploy Attacker
         const AttackerContract = await ethers.getContractFactory("Attacker", owner);
         const attacker = await AttackerContract.deploy(treasury.target, tokenERC20.target);
         await attacker.waitForDeployment();

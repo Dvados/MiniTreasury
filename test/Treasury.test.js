@@ -99,6 +99,7 @@ describe("Treasury", function() {
             await tokenERC20.connect(user).approve(treasury.target, ethers.parseUnits("100", decimals));
             
             await treasury.connect(user).depositERC20(tokenERC20.target, ethers.parseUnits("50", decimals));
+
             await treasury.enableToken(tokenERC20.target, true);
 
             await expect(
@@ -114,6 +115,7 @@ describe("Treasury", function() {
             await tokenERC20.connect(user).approve(treasury.target, ethers.parseUnits("100", decimals));
             
             await treasury.connect(user).depositERC20(tokenERC20.target, ethers.parseUnits("50", decimals));
+            
             await treasury.enableToken(tokenERC20.target, true);
 
             await treasury.connect(user).withdrawERC20(tokenERC20.target, ethers.parseUnits("20", decimals));
@@ -133,9 +135,9 @@ describe("Treasury", function() {
 
         await treasury.connect(user).depositERC721(tokenERC721.target, 1);
 
-        const erc721Deposits = await treasury.erc721Deposits(user.address, tokenERC721.target)
+        const erc721Deposits = await treasury.erc721Deposits(user.address, tokenERC721.target, 1)
 
-        expect(erc721Deposits).to.eq(1);
+        expect(erc721Deposits).to.be.true;
     });
 
 
@@ -161,6 +163,7 @@ describe("Treasury", function() {
             await tokenERC721.connect(user).approve(treasury.target, 1);
     
             await treasury.connect(user).depositERC721(tokenERC721.target, 1);
+
             await treasury.enableToken(tokenERC721.target, true);
 
             await expect(
@@ -176,13 +179,37 @@ describe("Treasury", function() {
             await tokenERC721.connect(user).approve(treasury.target, 1);
     
             await treasury.connect(user).depositERC721(tokenERC721.target, 1);
+
             await treasury.enableToken(tokenERC721.target, true);
 
             await treasury.connect(user).withdrawERC721(tokenERC721.target, 1);
 
-            const erc721Deposits = await treasury.erc721Deposits(user.address, tokenERC721.target);
+            const erc721Deposits = await treasury.erc721Deposits(user.address, tokenERC721.target, 1);
 
-            expect(erc721Deposits).to.eq(0);
+            expect(erc721Deposits).to.be.false;
+        });
+
+
+        it("Should allow a user to deposit ERC721 with two different tokenId and withdraw a specific one", async function () {
+            const { user, treasury, tokenERC721 } = await loadFixture(deploy);
+
+            await tokenERC721.safeMint(user.address);
+            await tokenERC721.safeMint(user.address);
+
+            await tokenERC721.connect(user).approve(treasury.target, 1);
+            await tokenERC721.connect(user).approve(treasury.target, 2);
+
+            await treasury.connect(user).depositERC721(tokenERC721.target, 1);
+            await treasury.connect(user).depositERC721(tokenERC721.target, 2);
+
+            await treasury.enableToken(tokenERC721.target, true);
+
+            await treasury.connect(user).withdrawERC721(tokenERC721.target, 1);
+
+            expect(await treasury.erc721Deposits(user.address, tokenERC721.target, 1)).to.be.false;
+            expect(await treasury.erc721Deposits(user.address, tokenERC721.target, 2)).to.be.true;
+
+            expect(await tokenERC721.ownerOf(1)).to.equal(user.address);
         });
     });
 });
