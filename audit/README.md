@@ -50,3 +50,10 @@ Because bool enabled can be false or true.
 That is, the name and description do not fully correspond to the behavior.
 ```
 
+### Low/Notes using IERC20, not ERC20
+```
+import {ERC20} from "../lib/solmate/src/tokens/ERC20.sol";
+You only need the interface IERC20, not implementation in Treasury.
+Even Solmate does not always follow this rule.
+https://github.com/transmissions11/solmate/blob/main/src/utils/SafeTransferLib.sol
+```
