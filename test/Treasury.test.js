@@ -40,11 +40,11 @@ describe("Treasury", function() {
         it("Owner can enable and disable tokens", async function() {
             const { treasury, tokenERC20, tokenERC721 } = await loadFixture(deploy);
     
-            await treasury.enableToken(tokenERC20.target, true);
+            await treasury.setTokenStatus(tokenERC20.target, true);
             const isEnabledTokenERC20 = await treasury.enabledTokens(tokenERC20.target);
             expect(isEnabledTokenERC20).to.be.true;
     
-            await treasury.enableToken(tokenERC20.target, false);
+            await treasury.setTokenStatus(tokenERC20.target, false);
             const isDisabledTokenERC20 = await treasury.enabledTokens(tokenERC20.target);
             expect(isDisabledTokenERC20).to.be.false;
     
@@ -57,7 +57,7 @@ describe("Treasury", function() {
             const { user, treasury, tokenERC20 } = await loadFixture(deploy);
     
             await expect(
-                treasury.connect(user).enableToken(tokenERC20.target, true)
+                treasury.connect(user).setTokenStatus(tokenERC20.target, true)
             ).to.be.revertedWith("Not the owner");
         });
     });    
@@ -68,6 +68,8 @@ describe("Treasury", function() {
 
         await tokenERC20.mint(user.address, ethers.parseUnits("100", decimals));
         await tokenERC20.connect(user).approve(treasury.target, ethers.parseUnits("100", decimals));
+
+        await treasury.setTokenStatus(tokenERC20.target, true);
 
         await treasury.connect(user).depositERC20(tokenERC20.target, ethers.parseUnits("50", decimals));
 
@@ -83,8 +85,12 @@ describe("Treasury", function() {
 
             await tokenERC20.mint(user.address, ethers.parseUnits("100", decimals));
             await tokenERC20.connect(user).approve(treasury.target, ethers.parseUnits("100", decimals));
+
+            await treasury.setTokenStatus(tokenERC20.target, true);
             
             await treasury.connect(user).depositERC20(tokenERC20.target, ethers.parseUnits("50", decimals));
+
+            await treasury.setTokenStatus(tokenERC20.target, false);
 
             await expect(
                 treasury.connect(user).withdrawERC20(tokenERC20.target, ethers.parseUnits("20", decimals))
@@ -97,10 +103,10 @@ describe("Treasury", function() {
 
             await tokenERC20.mint(user.address, ethers.parseUnits("100", decimals));
             await tokenERC20.connect(user).approve(treasury.target, ethers.parseUnits("100", decimals));
+
+            await treasury.setTokenStatus(tokenERC20.target, true);
             
             await treasury.connect(user).depositERC20(tokenERC20.target, ethers.parseUnits("50", decimals));
-
-            await treasury.enableToken(tokenERC20.target, true);
 
             await expect(
                 treasury.connect(user).withdrawERC20(tokenERC20.target, ethers.parseUnits("70", decimals))
@@ -113,10 +119,10 @@ describe("Treasury", function() {
 
             await tokenERC20.mint(user.address, ethers.parseUnits("100", decimals));
             await tokenERC20.connect(user).approve(treasury.target, ethers.parseUnits("100", decimals));
+
+            await treasury.setTokenStatus(tokenERC20.target, true);
             
             await treasury.connect(user).depositERC20(tokenERC20.target, ethers.parseUnits("50", decimals));
-            
-            await treasury.enableToken(tokenERC20.target, true);
 
             await treasury.connect(user).withdrawERC20(tokenERC20.target, ethers.parseUnits("20", decimals));
 
@@ -133,6 +139,8 @@ describe("Treasury", function() {
         await tokenERC721.safeMint(user.address);
         await tokenERC721.connect(user).approve(treasury.target, 1);
 
+        await treasury.setTokenStatus(tokenERC721.target, true);
+
         await treasury.connect(user).depositERC721(tokenERC721.target, 1);
 
         const erc721Deposits = await treasury.erc721Deposits(user.address, tokenERC721.target, 1)
@@ -147,8 +155,12 @@ describe("Treasury", function() {
 
             await tokenERC721.safeMint(user.address);
             await tokenERC721.connect(user).approve(treasury.target, 1);
+
+            await treasury.setTokenStatus(tokenERC721.target, true);
     
             await treasury.connect(user).depositERC721(tokenERC721.target, 1);
+
+            await treasury.setTokenStatus(tokenERC721.target, false);
 
             await expect(
                 treasury.connect(user).withdrawERC721(tokenERC721.target, 1)
@@ -161,10 +173,10 @@ describe("Treasury", function() {
 
             await tokenERC721.safeMint(user.address);
             await tokenERC721.connect(user).approve(treasury.target, 1);
+
+            await treasury.setTokenStatus(tokenERC721.target, true);
     
             await treasury.connect(user).depositERC721(tokenERC721.target, 1);
-
-            await treasury.enableToken(tokenERC721.target, true);
 
             await expect(
                 treasury.connect(user).withdrawERC721(tokenERC721.target, 4)
@@ -177,10 +189,10 @@ describe("Treasury", function() {
 
             await tokenERC721.safeMint(user.address);
             await tokenERC721.connect(user).approve(treasury.target, 1);
+
+            await treasury.setTokenStatus(tokenERC721.target, true);
     
             await treasury.connect(user).depositERC721(tokenERC721.target, 1);
-
-            await treasury.enableToken(tokenERC721.target, true);
 
             await treasury.connect(user).withdrawERC721(tokenERC721.target, 1);
 
@@ -199,10 +211,10 @@ describe("Treasury", function() {
             await tokenERC721.connect(user).approve(treasury.target, 1);
             await tokenERC721.connect(user).approve(treasury.target, 2);
 
+            await treasury.setTokenStatus(tokenERC721.target, true);
+
             await treasury.connect(user).depositERC721(tokenERC721.target, 1);
             await treasury.connect(user).depositERC721(tokenERC721.target, 2);
-
-            await treasury.enableToken(tokenERC721.target, true);
 
             await treasury.connect(user).withdrawERC721(tokenERC721.target, 1);
 

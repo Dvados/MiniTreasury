@@ -30,14 +30,14 @@ describe("TreasuryReentrancy", function() {
     it("Should prevent reentrancy attacks", async function() {
         const { user, treasury, tokenERC20, attacker } = await loadFixture(deploy);
 
+        await treasury.setTokenStatus(tokenERC20.target, true);
+
         await tokenERC20.mint(user.address, ethers.parseUnits("100", decimals));
         await tokenERC20.connect(user).approve(treasury.target, ethers.parseUnits("100", decimals));
         await treasury.connect(user).depositERC20(tokenERC20.target, ethers.parseUnits("100", decimals));
 
         await tokenERC20.mint(attacker.target, ethers.parseUnits("100", decimals));
         await attacker.deposit(ethers.parseUnits("100", decimals));
-
-        await treasury.enableToken(tokenERC20.target, true);
 
         await expect(
             attacker.attack(ethers.parseUnits("100", decimals))
