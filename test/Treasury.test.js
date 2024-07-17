@@ -63,20 +63,34 @@ describe("Treasury", function() {
     });    
 
 
-    it("Deposit ERC20", async function() {
-        const { user, treasury, tokenERC20 } = await loadFixture(deploy);
+    describe("ERC20 Deposits", function() {
+        it("Should allow a user to deposit ERC20 tokens", async function() {
+            const { user, treasury, tokenERC20 } = await loadFixture(deploy);
 
-        await tokenERC20.mint(user.address, ethers.parseUnits("100", decimals));
-        await tokenERC20.connect(user).approve(treasury.target, ethers.parseUnits("100", decimals));
+            await tokenERC20.mint(user.address, ethers.parseUnits("100", decimals));
+            await tokenERC20.connect(user).approve(treasury.target, ethers.parseUnits("100", decimals));
+    
+            await treasury.setTokenStatus(tokenERC20.target, true);
+    
+            await treasury.connect(user).depositERC20(tokenERC20.target, ethers.parseUnits("50", decimals));
+    
+            const erc20Deposits = await treasury.erc20Deposits(user.address, tokenERC20.target)
+    
+            expect(erc20Deposits).to.eq(ethers.parseUnits("50", decimals));
+        });
+    
 
-        await treasury.setTokenStatus(tokenERC20.target, true);
+        it("Should revert if trying to deposit ERC20 tokens when the token is disabled", async function() {
+            const { user, treasury, tokenERC20 } = await loadFixture(deploy);
 
-        await treasury.connect(user).depositERC20(tokenERC20.target, ethers.parseUnits("50", decimals));
-
-        const erc20Deposits = await treasury.erc20Deposits(user.address, tokenERC20.target)
-
-        expect(erc20Deposits).to.eq(ethers.parseUnits("50", decimals));
-    });
+            await tokenERC20.mint(user.address, ethers.parseUnits("100", decimals));
+            await tokenERC20.connect(user).approve(treasury.target, ethers.parseUnits("100", decimals));
+    
+            await expect(
+                treasury.connect(user).depositERC20(tokenERC20.target, ethers.parseUnits("50", decimals))
+            ).to.be.revertedWith("Token not enabled");
+        });
+    });    
 
 
     describe("ERC20 Withdrawals", function() {
@@ -133,20 +147,34 @@ describe("Treasury", function() {
     });
 
 
-    it("Deposit ERC721", async function() {
-        const { user, treasury, tokenERC721 } = await loadFixture(deploy);
+    describe("ERC721 Deposits", function() {
+        it("Should allow a user to deposit ERC721 tokens", async function() {
+            const { user, treasury, tokenERC721 } = await loadFixture(deploy);
 
-        await tokenERC721.safeMint(user.address);
-        await tokenERC721.connect(user).approve(treasury.target, 1);
+            await tokenERC721.safeMint(user.address);
+            await tokenERC721.connect(user).approve(treasury.target, 1);
+    
+            await treasury.setTokenStatus(tokenERC721.target, true);
+    
+            await treasury.connect(user).depositERC721(tokenERC721.target, 1);
+    
+            const erc721Deposits = await treasury.erc721Deposits(user.address, tokenERC721.target, 1)
+    
+            expect(erc721Deposits).to.be.true;
+        });
+    
 
-        await treasury.setTokenStatus(tokenERC721.target, true);
+        it("Should revert if trying to deposit ERC721 tokens when the token is disabled", async function() {
+            const { user, treasury, tokenERC721 } = await loadFixture(deploy);
 
-        await treasury.connect(user).depositERC721(tokenERC721.target, 1);
-
-        const erc721Deposits = await treasury.erc721Deposits(user.address, tokenERC721.target, 1)
-
-        expect(erc721Deposits).to.be.true;
-    });
+            await tokenERC721.safeMint(user.address);
+            await tokenERC721.connect(user).approve(treasury.target, 1);
+    
+            await expect(
+                treasury.connect(user).depositERC721(tokenERC721.target, 1)
+            ).to.be.revertedWith("Token not enabled");
+        });
+    });    
 
 
     describe("ERC721 Withdrawals", function() {
