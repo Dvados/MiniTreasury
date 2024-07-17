@@ -1,4 +1,4 @@
-# Internal audit of autonolas-tokenomics
+# Internal audit 
 The review has been performed based on the contract code in the following repository:<br>
 `https://github.com/Dvados/MiniTreasury` <br>
 commit: `5875f1bc46f4177acf11131cc3fdbf6f07fe5ef8` <br> 
